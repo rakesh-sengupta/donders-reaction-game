@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Donders' Three Reactions</title>
+<meta name="description" content="A six-minute reaction-time experiment based on F. C. Donders (1868). Nothing is saved or sent.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: one calm full-height "chronoscope" stage; instructions and results in a centred reading column. */
+:root {
+  --bg: #F3F1EC;          /* paper */
+  --panel: #FFFFFF;
+  --ink: #1C2433;         /* navy ink */
+  --muted: #5B6475;
+  --rule: #D8D4CB;
+  --accent: #1F3A5F;      /* course navy */
+  --go: #1F5FBF;          /* blue circle */
+  --nogo: #C8650F;        /* orange square */
+  --ok: #23665A;
+  --warn: #A12F24;
+  --stage: #E9E6DF;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", Arial, sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161E; --panel: #1A202B; --ink: #E8EAF0; --muted: #A3ABBA; --rule: #2E3646;
+    --accent: #9DB7DD; --go: #5B9BFF; --nogo: #F2994A; --ok: #6FC3AE; --warn: #F08A7E; --stage: #1E2532;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161E; --panel: #1A202B; --ink: #E8EAF0; --muted: #A3ABBA; --rule: #2E3646;
+  --accent: #9DB7DD; --go: #5B9BFF; --nogo: #F2994A; --ok: #6FC3AE; --warn: #F08A7E; --stage: #1E2532;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 18px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px;
+  box-sizing: border-box;
+}
+*, *::before, *::after { box-sizing: inherit; }
+.app { max-width: 960px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; gap: 12px; }
+.topbar { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; border-bottom: 2px solid var(--rule); padding-block: 4px 8px; }
+.topbar h1 { font-size: 1.05rem; margin: 0; letter-spacing: 0.02em; color: var(--accent); }
+.topbar .note { font-size: 0.85rem; color: var(--muted); }
+#jspsych-target { flex: 1 1 auto; min-height: 70vh; display: flex; flex-direction: column; }
+
+/* jsPsych essentials (inlined; the library's stylesheet cannot load here) */
+.jspsych-display-element { display: flex; flex-direction: column; overflow-y: auto; font-family: var(--font-body); font-size: 18px; line-height: 1.55; }
+.jspsych-display-element:focus { outline: none; }
+.jspsych-content-wrapper { display: flex; margin: auto; flex: 1 1 100%; width: 100%; }
+.jspsych-content { max-width: 100%; width: 100%; text-align: left; margin: auto; }
+.jspsych-btn {
+  display: inline-block; font: 700 1.05rem var(--font-body); cursor: pointer;
+  padding: 14px 28px; border-radius: 10px; border: 2px solid var(--accent);
+  background: var(--accent); color: var(--bg); min-width: 12rem; touch-action: manipulation;
+}
+.jspsych-btn:focus-visible { outline: 3px solid var(--go); outline-offset: 3px; }
+.jspsych-html-button-response-btngroup { display: flex; justify-content: center; margin-top: 18px; }
+
+/* reading column for instructions and results */
+.read { max-width: 40rem; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.read h2 { font-size: 1.6rem; line-height: 1.2; margin: 0; text-wrap: balance; }
+.read p { margin: 0; }
+.eyebrow { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.steps { margin: 0; padding-left: 1.4rem; display: flex; flex-direction: column; gap: 6px; }
+.keyrow { display: flex; flex-wrap: wrap; gap: 12px; }
+.keycard { flex: 1 1 14rem; min-width: 0; background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+.kbd { font-family: var(--font-num); font-weight: 600; border: 2px solid var(--ink); border-bottom-width: 4px; border-radius: 6px; padding: 2px 8px; }
+.calm { background: var(--panel); border-left: 4px solid var(--ok); padding: 10px 14px; border-radius: 6px; }
+
+/* shapes */
+.shape { flex: 0 0 auto; display: inline-block; }
+.shape.go { width: 64px; height: 64px; border-radius: 50%; background: var(--go); }
+.shape.nogo { width: 60px; height: 60px; border-radius: 6px; background: var(--nogo); }
+.shape.small.go { width: 34px; height: 34px; }
+.shape.small.nogo { width: 32px; height: 32px; }
+
+/* the stage */
+.stage {
+  position: relative; width: 100%; min-height: 62vh; border-radius: 14px; background: var(--stage);
+  border: 1px solid var(--rule); display: flex; flex-direction: column; align-items: center; justify-content: center;
+  touch-action: manipulation; user-select: none; -webkit-user-select: none; cursor: pointer; overflow: hidden;
+}
+.stage .label { position: absolute; top: 12px; left: 16px; right: 16px; display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--muted); }
+.stage .centre { height: 140px; display: flex; align-items: center; justify-content: center; }
+.fix { font: 600 2.6rem var(--font-num); color: var(--muted); }
+.stage .centre .shape.go { width: 120px; height: 120px; }
+.stage .centre .shape.nogo { width: 112px; height: 112px; border-radius: 10px; }
+.zone .shape.go { width: 30px; height: 30px; }
+.zone .shape.nogo { width: 28px; height: 28px; }
+.zones { position: absolute; inset: auto 0 0 0; display: flex; }
+.zone { flex: 1 1 0; min-width: 0; text-align: center; padding: 14px 8px 18px; font-size: 0.95rem; color: var(--muted); border-top: 1px dashed var(--rule); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.zone + .zone { border-left: 1px dashed var(--rule); }
+.fb { font-weight: 700; font-size: 1.3rem; text-align: center; padding: 0 12px; }
+.fb.ok { color: var(--ok); } .fb.bad { color: var(--warn); }
+
+/* results */
+.nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 10px; }
+.num { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
+.num .k { font-size: 0.85rem; color: var(--muted); }
+.num .v { font: 600 1.9rem var(--font-num); font-variant-numeric: tabular-nums; }
+.num .s { font-size: 0.8rem; color: var(--muted); }
+.diff { background: var(--panel); border: 2px solid var(--accent); border-radius: 10px; padding: 12px 14px; }
+.diff .v { font: 600 1.4rem var(--font-num); font-variant-numeric: tabular-nums; }
+.chart { overflow-x: auto; }
+.chart svg { display: block; width: 100%; max-width: 40rem; height: auto; }
+.copyline { font-family: var(--font-num); font-size: 1.05rem; background: var(--panel); border: 1px dashed var(--accent); border-radius: 8px; padding: 10px 12px; user-select: all; overflow-wrap: anywhere; }
+.btnrow { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn2 { font: 700 1rem var(--font-body); padding: 10px 18px; border-radius: 10px; border: 2px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; }
+.btn2:focus-visible { outline: 3px solid var(--go); outline-offset: 3px; }
+.loadmsg { margin: auto; color: var(--muted); }
+@media (max-width: 520px) {
+  body { font-size: 17px; }
+  .stage { min-height: 66vh; }
+  .zone { font-size: 0.85rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <h1>Donders' Three Reactions</h1>
+    <span class="note">Introduction to Neuroscience · Interlude · about 6 minutes · nothing is saved or sent</span>
+  </header>
+  <div id="jspsych-target"><p class="loadmsg" id="loadmsg">Loading the experiment…</p></div>
+</div>
+
+<script src="lib/jspsych-7.3.4.min.js"></script>
+<script src="lib/plugin-html-button-response-1.2.0.min.js"></script>
+<script>
+(function () {
+  "use strict";
+  var target = document.getElementById("jspsych-target");
+  if (typeof initJsPsych !== "function" || typeof jsPsychHtmlButtonResponse === "undefined") {
+    target.innerHTML = '<div class="read"><h2>The experiment could not load</h2><p>Check your internet connection and reload this page.</p></div>';
+    return;
+  }
+  var PT = jsPsychModule.ParameterType;
+
+  /* ---------- custom trial: foreperiod, shape, key OR tap response ---------- */
+  function DondersTrial(jsPsych) { this.jsPsych = jsPsych; }
+  DondersTrial.info = {
+    name: "donders-trial",
+    parameters: {
+      task: { type: PT.STRING, default: "A" },        // A simple, B choice, C go/no-go
+      stim: { type: PT.STRING, default: "go" },       // go = blue circle, nogo = orange square
+      practice: { type: PT.BOOL, default: false },
+      label: { type: PT.STRING, default: "" },
+      window_ms: { type: PT.INT, default: 1500 }
+    }
+  };
+  DondersTrial.prototype.trial = function (el, trial) {
+    var self = this;
+    var zonesHTML;
+    if (trial.task === "B") {
+      zonesHTML = '<div class="zones"><div class="zone"><span class="shape small go"></span> tap left half · or key <span class="kbd">F</span></div>' +
+                  '<div class="zone"><span class="shape small nogo"></span> tap right half · or key <span class="kbd">J</span></div></div>';
+    } else if (trial.task === "C") {
+      zonesHTML = '<div class="zones"><div class="zone"><span class="shape small go"></span> tap anywhere · or <span class="kbd">SPACE</span> &nbsp;|&nbsp; <span class="shape small nogo"></span> do nothing</div></div>';
+    } else {
+      zonesHTML = '<div class="zones"><div class="zone"><span class="shape small go"></span> tap anywhere · or press <span class="kbd">SPACE</span></div></div>';
+    }
+    el.innerHTML = '<div class="stage" id="stage" tabindex="-1" aria-live="polite">' +
+      '<div class="label"><span>' + trial.label + '</span><span>' + (trial.practice ? "practice" : "") + '</span></div>' +
+      '<div class="centre" id="centre"><span class="fix" aria-hidden="true">+</span></div>' + zonesHTML + '</div>';
+    var stage = el.querySelector("#stage");
+    var centre = el.querySelector("#centre");
+    try { stage.focus({ preventScroll: true }); } catch (e) {}
+
+    var phase = "wait";            // wait -> live -> done
+    var t0 = null, timers = [];
+    var foreperiod = 800 + Math.random() * 1200;
+
+    function side(evtOrKey) {
+      if (typeof evtOrKey === "string") return evtOrKey === "f" ? "left" : (evtOrKey === "j" ? "right" : "any");
+      var r = stage.getBoundingClientRect();
+      return (evtOrKey.clientX - r.left) < r.width / 2 ? "left" : "right";
+    }
+    function respond(where) {
+      if (phase === "done") return;
+      var now = performance.now();
+      if (phase === "wait") { finish({ early: true, responded: true, rt: null, correct: false, where: where }); return; }
+      var rt = Math.round(now - t0), correct;
+      if (trial.task === "A") correct = true;
+      else if (trial.task === "C") correct = (trial.stim === "go");
+      else correct = (trial.stim === "go" && where === "left") || (trial.stim === "nogo" && where === "right");
+      finish({ early: false, responded: true, rt: rt, correct: correct, where: where });
+    }
+    function onKey(e) {
+      if (e.repeat) return;
+      var k = (e.key || "").toLowerCase();
+      if (trial.task === "B") { if (k === "f" || k === "j") { e.preventDefault(); respond(side(k)); } }
+      else if (k === " " || k === "spacebar") { e.preventDefault(); respond("any"); }
+    }
+    function onPointer(e) { e.preventDefault(); respond(trial.task === "B" ? side(e) : "any"); }
+    document.addEventListener("keydown", onKey);
+    stage.addEventListener("pointerdown", onPointer);
+
+    function finish(r) {
+      if (phase === "done") return;
+      phase = "done";
+      timers.forEach(clearTimeout);
+      document.removeEventListener("keydown", onKey);
+      stage.removeEventListener("pointerdown", onPointer);
+      var msg = "", cls = "ok";
+      if (r.early) { msg = "Too soon. Wait for the shape."; cls = "bad"; }
+      else if (!r.responded) {
+        if (trial.task === "C" && trial.stim === "nogo") { msg = trial.practice ? "Right: you waited." : ""; }
+        else { msg = "Too slow. Try to respond a little faster."; cls = "bad"; }
+      } else if (!r.correct) {
+        msg = (trial.task === "C") ? "That was the orange square: do nothing for it." : "Other side: blue circle left, orange square right.";
+        cls = "bad";
+      } else if (trial.practice) { msg = "Correct (" + r.rt + " ms)"; }
+      centre.innerHTML = msg ? '<p class="fb ' + cls + '">' + msg + '</p>' : "";
+      var hold = msg ? (cls === "bad" ? 1100 : 700) : 350;
+      setTimeout(function () {
+        self.jsPsych.finishTrial({
+          task: trial.task, stim: trial.stim, practice: trial.practice,
+          rt: r.rt, correct: !!r.correct, early: !!r.early, responded: !!r.responded,
+          foreperiod_ms: Math.round(foreperiod)
+        });
+      }, hold);
+    }
+    timers.push(setTimeout(function () {
+      if (phase !== "wait") return;
+      centre.innerHTML = '<span class="shape ' + (trial.stim === "go" ? "go" : "nogo") + '" role="img" aria-label="' +
+        (trial.stim === "go" ? "blue circle" : "orange square") + '"></span>';
+      requestAnimationFrame(function () {
+        t0 = performance.now(); phase = "live";
+        timers.push(setTimeout(function () {
+          if (phase !== "live") return;
+          var correct = (trial.task === "C" && trial.stim === "nogo");
+          finish({ early: false, responded: false, rt: null, correct: correct });
+        }, trial.window_ms));
+      });
+    }, foreperiod));
+  };
+
+  /* ---------- helpers ---------- */
+  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function screen(html, btn) {
+    return { type: jsPsychHtmlButtonResponse, stimulus: '<div class="read">' + html + '</div>', choices: [btn || "Start"],
+             button_html: '<button class="jspsych-btn">%choice%</button>' };
+  }
+  function block(task, stims, practice, name) {
+    return stims.map(function (s, i) {
+      return { type: DondersTrial, task: task, stim: s, practice: practice,
+               label: name + " · " + (practice ? "practice " : "trial ") + (i + 1) + " of " + stims.length };
+    });
+  }
+  function repeat(x, n) { var a = []; for (var i = 0; i < n; i++) a.push(x); return a; }
+  var GO = '<span class="shape go" role="img" aria-label="blue circle"></span>';
+  var NOGO = '<span class="shape nogo" role="img" aria-label="orange square"></span>';
+
+  function start() {
+    target.innerHTML = "";
+    var jsPsych = initJsPsych({ display_element: target, on_finish: function () { showResults(jsPsych); } });
+    var tl = [];
+    tl.push(screen(
+      '<p class="eyebrow">Interlude · how fast is a thought?</p>' +
+      '<h2>Three short reaction games</h2>' +
+      '<p>In 1868 the Dutch physiologist F.&nbsp;C. Donders timed three kinds of reaction. Comparing them let him estimate how long a <strong>mental step</strong> takes. You will do the same.</p>' +
+      '<ol class="steps"><li><strong>Game A:</strong> respond to a blue circle.</li><li><strong>Game C:</strong> respond to the blue circle, but not to an orange square.</li><li><strong>Game B:</strong> a different response for each shape.</li></ol>' +
+      '<p class="calm">Each game starts with a few practice trials. Sit comfortably and use the same hand throughout. On a laptop use the keyboard; on a phone or tablet, tap the screen. <strong>Nothing you do is saved or sent anywhere.</strong> Your results appear on this screen at the end.</p>',
+      "Begin"));
+
+    // Game A
+    tl.push(screen(
+      '<p class="eyebrow">Game A of 3 · simple reaction</p><h2>Respond as soon as the blue circle appears</h2>' +
+      '<div class="keyrow"><div class="keycard">' + GO + '<span>Press <span class="kbd">SPACE</span> or tap anywhere on the grey area.</span></div></div>' +
+      '<p>A <strong>+</strong> appears first. Wait for the circle: responding before it shows counts as too soon. There are 3 practice trials.</p>', "Start practice"));
+    tl = tl.concat(block("A", repeat("go", 3), true, "Game A"));
+    tl.push(screen('<p class="eyebrow">Game A of 3</p><h2>Practice done</h2><p>Now 15 trials, no feedback unless you are too early or too slow.</p>', "Start Game A"));
+    tl = tl.concat(block("A", repeat("go", 15), false, "Game A"));
+
+    // Game C
+    tl.push(screen(
+      '<p class="eyebrow">Game C of 3 · respond to one shape only</p><h2>Respond to the blue circle. Do nothing for the orange square.</h2>' +
+      '<div class="keyrow"><div class="keycard">' + GO + '<span>Blue circle: press <span class="kbd">SPACE</span> or tap.</span></div>' +
+      '<div class="keycard">' + NOGO + '<span>Orange square: <strong>do nothing</strong>. It goes away by itself.</span></div></div>' +
+      '<p>There are 4 practice trials.</p>', "Start practice"));
+    tl = tl.concat(block("C", shuffle(["go", "nogo", "go", "nogo"]), true, "Game C"));
+    tl.push(screen('<p class="eyebrow">Game C of 3</p><h2>Practice done</h2><p>Now 16 trials: half circles, half squares, in a random order.</p>', "Start Game C"));
+    tl = tl.concat(block("C", shuffle(repeat("go", 8).concat(repeat("nogo", 8))), false, "Game C"));
+
+    // Game B
+    tl.push(screen(
+      '<p class="eyebrow">Game B of 3 · choice reaction</p><h2>A different response for each shape</h2>' +
+      '<div class="keyrow"><div class="keycard">' + GO + '<span>Blue circle: <span class="kbd">F</span> or tap the <strong>left</strong> half.</span></div>' +
+      '<div class="keycard">' + NOGO + '<span>Orange square: <span class="kbd">J</span> or tap the <strong>right</strong> half.</span></div></div>' +
+      '<p>On a keyboard, rest your left index finger on F and your right index finger on J. There are 4 practice trials.</p>', "Start practice"));
+    tl = tl.concat(block("B", shuffle(["go", "nogo", "go", "nogo"]), true, "Game B"));
+    tl.push(screen('<p class="eyebrow">Game B of 3</p><h2>Practice done</h2><p>Now 16 trials. This is the last game.</p>', "Start Game B"));
+    tl = tl.concat(block("B", shuffle(repeat("go", 8).concat(repeat("nogo", 8))), false, "Game B"));
+
+    jsPsych.run(tl);
+  }
+
+  function median(xs) {
+    if (!xs.length) return null;
+    var s = xs.slice().sort(function (a, b) { return a - b; }), m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2);
+  }
+  function fmt(v) { return v === null ? "–" : v + " ms"; }
+  function signed(v) { return v === null ? "–" : (v > 0 ? "+" : "") + v + " ms"; }
+
+  function showResults(jsPsych) {
+    var rows = jsPsych.data.get().filter({ trial_type: "donders-trial", practice: false }).values();
+    function stats(task) {
+      var all = rows.filter(function (r) { return r.task === task; });
+      var good = all.filter(function (r) { return r.correct && r.responded && r.rt !== null && r.rt >= 100 && r.rt <= 1500; })
+                    .map(function (r) { return r.rt; });
+      var acc = all.length ? Math.round(100 * all.filter(function (r) { return r.correct; }).length / all.length) : 0;
+      return { med: median(good), n: good.length, acc: acc };
+    }
+    var A = stats("A"), B = stats("B"), C = stats("C");
+    var identify = (C.med !== null && A.med !== null) ? C.med - A.med : null;
+    var choose = (B.med !== null && C.med !== null) ? B.med - C.med : null;
+
+    var maxv = Math.max(A.med || 0, B.med || 0, C.med || 0, 400);
+    var W = 560, rowH = 46, left = 150, right = 70, plotW = W - left - right;
+    function bar(y, label, v, color) {
+      var w = v ? Math.round(plotW * v / maxv) : 0;
+      return '<text x="' + (left - 10) + '" y="' + (y + 24) + '" text-anchor="end" fill="var(--ink)" font-size="15" font-family="var(--font-body)">' + label + '</text>' +
+             '<rect x="' + left + '" y="' + (y + 8) + '" width="' + w + '" height="24" rx="4" fill="' + color + '"></rect>' +
+             '<text x="' + (left + w + 8) + '" y="' + (y + 25) + '" fill="var(--ink)" font-size="15" font-family="var(--font-num)">' + (v ? v + " ms" : "–") + '</text>';
+    }
+    var ticks = "";
+    for (var t = 0; t <= maxv; t += 100) {
+      var x = left + Math.round(plotW * t / maxv);
+      ticks += '<line x1="' + x + '" y1="4" x2="' + x + '" y2="' + (rowH * 3 + 6) + '" stroke="var(--rule)" stroke-width="1"></line>' +
+               '<text x="' + x + '" y="' + (rowH * 3 + 24) + '" text-anchor="middle" fill="var(--muted)" font-size="12" font-family="var(--font-num)">' + t + '</text>';
+    }
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + (rowH * 3 + 34) + '" role="img" aria-label="Your median reaction times for games A, C and B">' + ticks +
+      bar(0, "A  simple", A.med, "var(--accent)") + bar(rowH, "C  one shape only", C.med, "var(--go)") + bar(rowH * 2, "B  choice", B.med, "var(--nogo)") + '</svg>';
+
+    var copy = "A " + (A.med ?? "–") + " | C " + (C.med ?? "–") + " | B " + (B.med ?? "–");
+    target.innerHTML =
+      '<div class="read">' +
+      '<p class="eyebrow">Your results</p><h2>How long your mental steps took</h2>' +
+      '<div class="nums">' +
+        '<div class="num"><span class="k">Game A · simple</span><span class="v">' + fmt(A.med) + '</span><span class="s">' + A.acc + '% correct</span></div>' +
+        '<div class="num"><span class="k">Game C · one shape only</span><span class="v">' + fmt(C.med) + '</span><span class="s">' + C.acc + '% correct</span></div>' +
+        '<div class="num"><span class="k">Game B · choice</span><span class="v">' + fmt(B.med) + '</span><span class="s">' + B.acc + '% correct</span></div>' +
+      '</div>' +
+      '<div class="chart">' + svg + '</div>' +
+      '<div class="diff"><p><strong>Telling the shapes apart</strong> = C − A = <span class="v">' + signed(identify) + '</span></p>' +
+      '<p><strong>Choosing which response</strong> = B − C = <span class="v">' + signed(choose) + '</span></p></div>' +
+      '<p>These are Donders\' two subtractions. Game C adds one step to Game A: <em>which shape is it?</em> Game B adds another: <em>which response goes with it?</em> Subtracting one reaction time from another estimates how long that extra step took.</p>' +
+      '<p class="calm"><strong>Copy these three numbers onto your booklet sheet:</strong></p>' +
+      '<div class="copyline" id="copyline">' + copy + '</div>' +
+      '<div class="btnrow"><button class="btn2" id="copybtn" type="button">Copy numbers</button><button class="btn2" id="again" type="button">Run again</button></div>' +
+      '<p style="color:var(--muted);font-size:0.9rem">Each number is your median reaction time, using only correct responses between 100 and 1500 ms. With so few trials, one person\'s difference can even come out negative; the class average is steadier. Touch screens and keyboards add their own small delays, but these are much the same in all three games, so they mostly cancel out in the subtractions.</p>' +
+      '</div>';
+    document.getElementById("again").addEventListener("click", start);
+    document.getElementById("copybtn").addEventListener("click", function () {
+      var b = this;
+      try {
+        navigator.clipboard.writeText(copy).then(function () { b.textContent = "Copied"; }, function () { selectCopy(); });
+      } catch (e) { selectCopy(); }
+    });
+    function selectCopy() {
+      var r = document.createRange(); r.selectNodeContents(document.getElementById("copyline"));
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+    }
+  }
+
+  start();
+})();
+</script>
+</body>
+</html>
