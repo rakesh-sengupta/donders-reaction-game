@@ -25,16 +25,7 @@ browser tab and disappear when it is closed.
 | `lib/LICENSE-jsPsych.txt` | jsPsych licence |
 | `.nojekyll` | Tells GitHub Pages to serve the files as they are |
 
-## Publishing on GitHub Pages
 
-1. On GitHub, create a new **public** repository, e.g. `donders-reaction-game`.
-2. Upload everything in this folder, keeping the `lib/` folder.
-   The `.nojekyll` file is hidden on most computers: upload it too if you can,
-   but the site still works without it.
-3. Go to **Settings → Pages**. Under *Build and deployment*, choose
-   **Deploy from a branch**, branch **main**, folder **/ (root)**, then **Save**.
-4. After a minute or two the site is live at
-   `https://<your-username>.github.io/donders-reaction-game/`.
 
 ## Credits
 
